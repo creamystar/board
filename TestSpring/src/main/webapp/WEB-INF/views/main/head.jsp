@@ -16,27 +16,45 @@ height: 100px;
 background-color:orange;
 }
 .top > div {
-display:inline-block;
+padding-top: 70px;
+padding-left: 30px;
+}
+.top > div > div {
+display:table-cell;
+vertical-align: middle;
 color:white;
-width:50px;
-heith:30px;
+padding-left: 10px;
+padding-right: 10px;
+height: 30px;
 text-align:center;
-margin-top: 80px;
 cursor: pointer;
 }
 
-.first{
-margin-left: 30px;
-}
-
-.top > div:hover{
+.top > div > div:hover{
 background-color: darkgreen;
 }
+.select:hover{
+background-color: gray !important;
+}
+
+
 
 </style>
 <script type="text/javascript" src="resources/javascript/jquery/jquery.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
+	$("#mainb").attr("class","select");
+	
+	$("#mainb").on("click",function(){
+		$("#mainb").attr("class","select");
+		location.href = "main";
+	})
+	
+	$("#mainb").on("click",function(){
+		$("#mainb").attr("class","select");
+		location.href = "main";
+	})
+	
 	
 	
 	
@@ -46,16 +64,18 @@ $(document).ready(function(){
 </head>
 <body>
 <div class="top">
-<div class="first"> 메인 </div>
-<div> 이미지 </div>
-<div> 추천 </div>
-<div> 컬쳐 </div>
-<div> 트립 </div>
-<div> 무비 </div>
-<div> 드라마 </div>
-<div> 라이프 </div>
-<div> 직장 </div>
-<div> 책 </div>
+<div>
+<div id="mainb"> 메인 </div>
+<div id="imageb"> 이미지 </div>
+<div id="recb"> 추천 </div>
+<div id="cultureb"> 컬쳐 </div>
+<div id="tripb"> 트립 </div>
+<div id="movieb"> 무비 </div>
+<div id="dramab"> 드라마 </div>
+<div id="lifeb"> 라이프 </div>
+<div id="jobb"> 직장 </div>
+<div id="bookb"> 책 </div>
+</div>
 </div>
 </body>
 </html>
