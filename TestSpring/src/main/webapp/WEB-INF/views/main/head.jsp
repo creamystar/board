@@ -72,7 +72,7 @@ $(document).ready(function(){
 <div id="tripb"> 트립 </div>
 <div id="movieb"> 무비 </div>
 <div id="dramab"> 드라마 </div>
-<div id="lifeb"> 라이프 </div>
+<div id="lifeb"> 일상 </div>
 <div id="jobb"> 직장 </div>
 <div id="bookb"> 책 </div>
 </div>

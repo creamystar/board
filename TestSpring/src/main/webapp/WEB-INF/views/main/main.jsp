@@ -15,7 +15,9 @@ margin: 100px auto;
 }
 .btitle{
 display: inline-block;
+text-align: center;
 padding-left: 10px;
+margin-right: 20px;
 font-weight: bold;
 font-size: 10pt;
 color: #e17515;
@@ -24,18 +26,22 @@ color: #e17515;
 display: inline-block;
 float: right;
 }
-.searchTxt{
+#searchTxt{
 height: 20px;
 margin-right: 5px;
 border: 1px solid orange;
 outline-color: darkgreen;
 }
-.searchBtn{
+.searchBtn, .writeBtn{
 background-color: orange;
 color: white;
 border: 0px;
 height: 25px;
 outline-color: darkgreen;
+cursor: pointer;
+}
+.writeBtn{
+margin-left: 30px;
 }
 .board{
 text-align: center;
@@ -77,10 +83,10 @@ margin: 0px auto;
 text-align: center;
 margin-top: 25px;
 }
-.paging > div {
+.pagingD {
 display:inline-block;
 }
-.paging > div > div {
+.pagingD > div {
 display: table-cell;
 vertical-align: middle;
 text-align: center;
@@ -90,14 +96,14 @@ font-size:8pt;
 color: gray;
 cursor: pointer;
 }
-.paging > div > div:hover{
+.pagingD > div:hover{
 background-color: lightgray;
 }
-.pagehere{
+#pagehere{
 background-color: orange;
 color: white !important;
 }
-.pagehere:hover{
+#pagehere:hover{
 background-color: orange !important;
 }
 
@@ -106,17 +112,139 @@ background-color: orange !important;
 <script type="text/javascript" src="resources/javascript/jquery/jquery.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
+	loadList();
+	
+	$(".searchBtn").on("click", function(){
+		$("#page").val("1");
+		loadList();
+	})//searchBtn 
+	
+	$(".writeBtn").on("click", function(){
+		$("#actionForm").attr("action","mainWrite");
+		$("#actionFrom").submit();
+	})//writeBtn
+	
+	$(".pagingD").on("click", "div", function(){
+		$("#page").val($(this).attr("name"));
+		loardList();
+	})//pagingBtn
+	
+	$("#searchTxt").on("keypress",function(event){
+		if(event.keyCode == 13){
+			$(".searchBtn").click();
+			return false;
+		}
+	})//searchTxt and endter
+	
+	$(".board tbody").on("click","tr",function(){
+		if($(this).is("[name]")){
+			$("#boardNo").val($(this).attr("name"));
+			
+			$("#actionForm").attr("action","mainRead");
+			$("#actionFrom").submit();
+		}
+	})//tbody click
+	
+});//document ready end
+
+
+function loadList(){
+	var params = $("#actionForm").serialize();
+	
+	$.ajax({ 
+		type : "post", 
+		url : "mainbListAjax", 
+		dataType : "json",  
+		data : params,
+		success : function(res) { 
+			if(res.result == "success"){
+				drawList(res.list);
+				drawPaging(res.pb);
+			} else {
+				alert("오류가 발생하였습니다.");
+			}
+		},
+		error : function(request, status, error) { 
+			console.log("text : " + request.responseText); 
+			console.log("error : " + error); 
+		} 
+	});//ajax
+	
+}//loadList end
+
+function drawList(list){
+	if(list.length==0) {
+		var html = "";
+		html += "<tr class=\"nothing\">";
+		html += "<td colspan=\"7\" class=\"nothing\">조회 결과가 없습니다.</td>";
+		html += "</tr>";
+	
+		$(".board tbody").html(html);
+	
+	} else {
+		var html="";
+		
+		for(var i = 0; i < list.length; i++){
+		
+			html += "<tr name=\"" + list[i].BOARD_NO + "\">";
+			html += "<td>" + list[i].BOARD_NO + "</td>";
+			html += "<td>" + list[i].BOARD_TYPE + "</td>";
+			html += "<td>" + list[i].BOARD_TITLE + "</td>";
+			html += "<td>" + list[i].BOARD_DATE + "</td>";
+			html += "<td>" + list[i].BOARD_VIEW + "</td>";
+			html += "</tr>";
+		
+		$(".board tbody").html(html);
+		
+		}
+	}
+}//drawList end
+
+function drawPaging(pb){
+	
+	var html = "<div name=\"1\">처음</div>";
+	
+	if($("#page").val() == "1"){
+		html += "<div name=\"1\">이전</div>";
+	} else {
+		html += "<div name=\"" + ($("#page").val() * 1 - 1) + "\">이전</div>";
+	}
+	
+	for(var i = pb.startPcount ; i <= pb.endPcount ; i++){
+		if(i == $("#page").val()) {
+			html += "<div name = \"" + i + "\" id=\"pagehere\">" + i + "</div>";
+		} else {
+			html += "<div name = \"" + i + "\">" + i + "</div>";
+		}
+	}
+	
+	if($("#page").val() == pb.maxPcount){
+		html += "<div name = \"" + pb.maxPcount + "\">다음</div>";
+	} else {
+		html += "<div name = \"" + ($("#page").val() * 1 + 1) + "\">다음</div>";		
+	}
+	
+	html += "<div name = \"" + pb.maxPcount + "\">끝</div>";
+	
+	$(".pagingD").html(html);
 	
 	
-	
-});//document
+} //drawPaging end
 </script>
 
 </head>
 <body>
+
 <div class="wrapb">
+<form action="#" id="actionForm" method="post">
+<input type="hidden" name="boardNo" id="boardNo">
+<input type="hidden" name="page" id="page" value="1">
+
 <div class="btitle"> 메인 게시판 </div> 
-<div class="searchright"><input type="text" class="searchTxt"><input type="button" class="searchBtn" value="검색"></div>
+<input type="text" id="searchTxt" name="searchTxt"><input type="button" class="searchBtn" value="검색">
+
+<div class="searchright"><input type="button" class="writeBtn" value="글쓰기"></div>
+</form>
 <table class="board">
 	<colgroup>
 		<col width="80px">
@@ -161,8 +289,8 @@ $(document).ready(function(){
 </table>
 
 <div class="paging">
-<div>
-	<div>처음</div><div>이전</div><div class="pagehere">1</div><div>2</div><div>3</div><div>다음</div><div>끝</div>
+<div class="pagingD">
+	<div>처음</div><div>이전</div><div id="pagehere">1</div><div>2</div><div>3</div><div>다음</div><div>끝</div>
 </div>
 </div>
 </div>
