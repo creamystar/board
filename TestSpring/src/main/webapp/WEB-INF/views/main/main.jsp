@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +11,7 @@
 <c:import url="/head"></c:import>
 <style type="text/css">
 .wrapb{
-width:70%;
+width:80%;
 margin: 100px auto;
 }
 .btitle{
@@ -121,7 +122,7 @@ $(document).ready(function(){
 	
 	$(".writeBtn").on("click", function(){
 		$("#actionForm").attr("action","mainWrite");
-		$("#actionFrom").submit();
+		$("#actionForm").submit();
 	})//writeBtn
 	
 	$(".pagingD").on("click", "div", function(){
@@ -139,9 +140,8 @@ $(document).ready(function(){
 	$(".board tbody").on("click","tr",function(){
 		if($(this).is("[name]")){
 			$("#boardNo").val($(this).attr("name"));
-			
 			$("#actionForm").attr("action","mainRead");
-			$("#actionFrom").submit();
+			$("#actionForm").submit();
 		}
 	})//tbody click
 	
@@ -175,9 +175,6 @@ function loadList(){
 function drawList(list){
 	if(list.length==0) {
 		var html = "";
-		html += "<tr class=\"nothing\">";
-		html += "<td colspan=\"7\" class=\"nothing\">조회 결과가 없습니다.</td>";
-		html += "</tr>";
 	
 		$(".board tbody").html(html);
 	
@@ -250,7 +247,7 @@ function drawPaging(pb){
 		<col width="80px">
 		<col width="120px">
 		<col width="70%">
-		<col width="80px">
+		<col width="120px">
 		<col width="80px">
 	</colgroup>
 	<thead>
@@ -263,27 +260,7 @@ function drawPaging(pb){
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td>3</td>
-			<td>라이프</td>
-			<td>셔츠 골라주면 소원 이뤄짐</td>
-			<td>20.08.29</td>
-			<td>14</td>
-		</tr>
-		<tr>
-			<td>2</td>
-			<td>라이프</td>
-			<td>지나가는 밤의 구름은 보라</td>
-			<td>20.08.29</td>
-			<td>14</td>
-		</tr>
-		<tr>
-			<td>1</td>
-			<td>드라마</td>
-			<td>굿 플레이스 아시는 분?</td>
-			<td>20.08.29</td>
-			<td>14</td>
-		</tr>
+		
 	</tbody>
 
 </table>
