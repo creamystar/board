@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gd.test.Sha256;
 import com.gd.test.service.IPagingService;
 import com.gd.test.service.ITestService;
-import com.gd.vanilla.util.Utils;
 
 @Controller
 public class TestController {
@@ -39,6 +40,128 @@ public class TestController {
 		mav.setViewName("main/head");
 		return mav;
 	}
+	
+	@RequestMapping(value="/login")
+	public ModelAndView login(@RequestParam HashMap<String,String> params, ModelAndView mav) throws Throwable {
+		mav.setViewName("main/login");
+		return mav;
+	}//login
+	
+	@RequestMapping(value="/join")
+	public ModelAndView join(@RequestParam HashMap<String,String> params, ModelAndView mav) throws Throwable {
+		mav.setViewName("main/join");
+		return mav;
+	}//join
+	
+	@RequestMapping(value="/logout")
+	public ModelAndView logout(HttpSession session, ModelAndView mav) throws Throwable {
+		
+		session.invalidate();
+		mav.setViewName("main/login");
+		return mav;
+	}//logout
+	
+	@RequestMapping(value = "/loginAjax", method = RequestMethod.POST, produces = "text/json;charset=UTF-8" )
+	@ResponseBody
+	public String loginAjax(HttpSession session, @RequestParam HashMap<String,String> params) throws Throwable {
+		Object mapper = new ObjectMapper();
+		Map<String, Object> modelMap = new HashMap<String, Object>();
+		
+		try {
+			//비밀번호 암호화 
+			String pswd = params.get("pswd");
+			pswd = Sha256.encrypt(pswd);
+			params.put("pswd", pswd);
+			
+			//이메일, 비밀번호 확인 
+			  //이메일 
+			int cnt = iTestService.checkEmailCnt(params);
+			
+			if(cnt > 0) {
+				
+				int cnt2 = iTestService.checkPswdCnt(params);
+				
+				if(cnt2 > 0) {
+					//일치하면 success
+					//이메일이 없거나 비밀번호가 불일치하면 fail
+					//세션 정보 액션폼에 담아서 메인에 할당
+					HashMap<String,String> data = iTestService.getMemberData(params);
+					
+					session.setAttribute("sMemberNo", data.get("MEMBER_NO"));
+					session.setAttribute("sMemberNm", data.get("MEMBER_NM"));
+					//AOP 설정 (main 들어가는건 login 해야만)
+					//(login,join은 login 안해야만)
+
+
+					modelMap.put("result", "success");
+				} else {
+					modelMap.put("result", "fail");
+				}
+				
+			} else {
+				modelMap.put("result", "fail");
+			}
+			
+			
+			
+		} catch(Throwable e) {
+			e.printStackTrace();
+			modelMap.put("result","exception");
+		}
+		
+		return ((ObjectMapper) mapper).writeValueAsString(modelMap);
+	}//loginAjax
+	
+	@RequestMapping(value = "/emailCheckAjax", method = RequestMethod.POST, produces = "text/json;charset=UTF-8" )
+	@ResponseBody
+	public String emailCheckAjax(HttpSession session, @RequestParam HashMap<String,String> params) throws Throwable {
+		Object mapper = new ObjectMapper();
+		Map<String, Object> modelMap = new HashMap<String, Object>();
+		
+		try {
+			
+			int cnt = iTestService.checkEmailCnt(params);
+			
+			if(cnt > 0) {
+
+				modelMap.put("result", "fail");
+				
+			} else {
+				modelMap.put("result", "success");
+			}
+			
+			
+			
+		} catch(Throwable e) {
+			e.printStackTrace();
+			modelMap.put("result","exception");
+		}
+		
+		return ((ObjectMapper) mapper).writeValueAsString(modelMap);
+	}//emailCheckAjax
+	
+	@RequestMapping(value = "/joinAjax", method = RequestMethod.POST, produces = "text/json;charset=UTF-8" )
+	@ResponseBody
+	public String joinAjax(HttpSession session, @RequestParam HashMap<String,String> params) throws Throwable {
+		Object mapper = new ObjectMapper();
+		Map<String, Object> modelMap = new HashMap<String, Object>();
+		
+		try {
+			//비밀번호 암호화 
+			String pswd = params.get("pswd");
+			pswd = Sha256.encrypt(pswd);
+			params.put("pswd", pswd);
+			
+			iTestService.insertNew(params);
+			modelMap.put("result", "success");
+			
+		} catch(Throwable e) {
+			e.printStackTrace();
+			modelMap.put("result","exception");
+		}
+		
+		return ((ObjectMapper) mapper).writeValueAsString(modelMap);
+	}//joinAjax
 	
 	@RequestMapping(value = "/mainbListAjax", method = RequestMethod.POST, produces = "text/json;charset=UTF-8" )
 	@ResponseBody
@@ -73,6 +196,8 @@ public class TestController {
 		return ((ObjectMapper) mapper).writeValueAsString(modelMap);
 	}//mainbListAjax
 	
+	
+	
 	@RequestMapping(value = "/replywriteAjax", method = RequestMethod.POST, produces = "text/json;charset=UTF-8" )
 	@ResponseBody
 	public String replywriteAjax(@RequestParam HashMap<String,String> params) throws Throwable {
@@ -80,11 +205,7 @@ public class TestController {
 		Map<String, Object> modelMap = new HashMap<String, Object>();
 		
 		try {
-			
-			String pw = params.get("pw");
-			pw = Utils.encryptAES128(pw);
-			params.put("pw", pw);
-			
+			//댓글내용 DB입력 
 			iTestService.writereply(params);
 			modelMap.put("result", "success");
 			
@@ -124,6 +245,8 @@ public class TestController {
 		Map<String, Object> modelMap = new HashMap<String, Object>();
 		
 		try {
+			
+			//리플개수 (페이징위해)
 			int cnt = iTestService.getreplyCnt(params);
 			int viewCnt = 100;
 			int pageCnt = 5;
@@ -136,10 +259,35 @@ public class TestController {
 			params.put("startCnt", Integer.toString(pb.get("startcount")));
 			params.put("endCnt", Integer.toString(pb.get("endcount")));
 			
+			//리플 해시맵 
 			List<HashMap<String,String>> list = iTestService.getreplyList(params);
 			
 			modelMap.put("cnt", cnt);
 			modelMap.put("list", list);
+			
+			//리플 유저
+			List<String> user = new ArrayList<String>();
+			
+			for(int i = list.size() - 1;i>=0;i--) {
+				boolean check = true;
+				if(String.valueOf(list.get(i).get("MEMBER_NO")) == String.valueOf(list.get(0).get("WRITER_NO"))) {
+					user.add("user writer");
+				}else {
+					for(int j=list.size()-1;j>i;j--) {
+						if(String.valueOf(list.get(i).get("MEMBER_NO")) == String.valueOf(list.get(j).get("MEMBER_NO"))) {
+							check = false;
+							user.add("user "+(j+1));
+						}
+					}
+					if(check) {
+						user.add("user "+(i+1));
+					}
+				}
+				
+			}//user 전체 포문 
+			
+			modelMap.put("user", user);
+			
 			modelMap.put("result", "success");
 			
 		} catch(Throwable e) {

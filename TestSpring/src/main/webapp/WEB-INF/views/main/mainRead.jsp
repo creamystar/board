@@ -234,7 +234,7 @@ function loadreplyList(){
 		success : function(res) { //석세스일때 넘어오는 값을 res로 받겠다 
 			if(res.result == "success"){
 				/* location.href = "bMain"; */
-				redrawList(res.list,res.cnt);
+				redrawList(res.list,res.cnt,res.user);
 				redrawPaging(res.pb,res.cnt);
 				console.log("res.cnt: "+res.cnt);
 			} else {
@@ -249,7 +249,7 @@ function loadreplyList(){
 	
 }//reloadList
 
-function redrawList(list,cnt){
+function redrawList(list,cnt,user){
 	
 		var h = "댓글 " + cnt + "개";
 		$(".replyCnt").html(h);
@@ -263,8 +263,16 @@ function redrawList(list,cnt){
 			var html="";
 			
 			for(var i = 0; i < list.length; i++){
+				
+				
 				html += "<tr>";
-				html += "<td><div>" + list[i].REPLY_NO + ". "
+				html += "<td><div>" + list[i].REPLY_NO + ". ";
+				
+				//reply user1 user2 순 
+				//근데 동일 user면 user3 뒤에 user2 가 글 썼으면 user2라고 뜨기 
+				//지은이는 user writer
+				html += "<span>" + user[i] + "</span>";
+				
 				if(list[i].REPLY_DATE == list[i].SYS_DATE){
 					html += "<span>" + list[i].REPLY_TIME + "</span>";
 				}else {
@@ -364,8 +372,7 @@ function redrawPaging(pb,cnt){
 <table class="reply">
 	<tbody>
 		<tr>
-			<td><div>번호. <span>날짜시간</span></div> 
-			내용 <input type="button" id="reUpBtn" value="수정"><input type="button" id="reDelBtn" value="삭제"></td>
+			
 		</tr>
 	</tbody>
 </table>
@@ -378,9 +385,10 @@ function redrawPaging(pb,cnt){
 
 <form action="#" id="replyForm" method="post">
 <input type="hidden" name="boardNo" id="boardNo" value="${param.boardNo}">
+<input type="hidden" name="memberNo" id="memberNo" value="${sMemberNo}">
 <textarea rows="5" class="ta" id="retxt" name="retxt"></textarea> 
 <div>
-<div class="bottomright">비밀번호 <input type="password" id="pw" name="pw"><input type="button" class="replyWriteBtn" value="댓글작성"></div>
+<div class="bottomright"><input type="button" class="replyWriteBtn" value="댓글작성"></div>
 </div>
 </form>
 

@@ -15,11 +15,17 @@ width: 100%;
 height: 100px;
 background-color:orange;
 }
-.top > div {
+.my {
+margin-right: 10px;
+margin-top: 10px;
+float: right;
+color: white;
+}
+.menu{
 padding-top: 70px;
 padding-left: 30px;
 }
-.top > div > div {
+.menu > div {
 display:table-cell;
 vertical-align: middle;
 color:white;
@@ -30,13 +36,18 @@ text-align:center;
 cursor: pointer;
 }
 
-.top > div > div:hover{
+.menu > div:hover{
 background-color: darkgreen;
 }
 .select:hover{
 background-color: gray !important;
 }
-
+#logout, #mine, #config{
+background-color: white;
+border: 0px;
+color: orange;
+margin-right: 5px;
+}
 
 
 </style>
@@ -44,6 +55,10 @@ background-color: gray !important;
 <script type="text/javascript">
 $(document).ready(function(){
 	$("#mainb").attr("class","select");
+	
+	$("#logout").on("click",function(){
+		location.href="logout";
+	})//logout click
 	
 	$("#mainb").on("click",function(){
 		$("#mainb").attr("class","select");
@@ -64,7 +79,8 @@ $(document).ready(function(){
 </head>
 <body>
 <div class="top">
-<div>
+<div class="my"> ${sMemberNm}님 안녕하세요. <input type="button" id="logout" value="logout"><input type="button" id="mine" value="mine"><input type="button" id="config" value="config"></div>
+<div class="menu">
 <div id="mainb"> 메인 </div>
 <div id="imageb"> 이미지 </div>
 <div id="recb"> 추천 </div>
